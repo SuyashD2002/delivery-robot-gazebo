@@ -52,11 +52,15 @@ source install/setup.bash
 Launch the full stack (Gazebo + world + robot + SLAM + RViz) with a single command:
 
 ```bash
+pkill -9 -f gzserver; pkill -9 -f gzclient; pkill -9 -f slam_toolbox; pkill -9 -f rviz2; pkill -9 -f ekf
+cd ~/delivery_robot_ws
+colcon build --packages-select Office_delivery_bot2
+source install/setup.bash
 ros2 launch Office_delivery_bot2 bringup.launch.py
 ```
 
 This starts:
-- Gazebo with the `cubicle_office.world`
+- Gazebo with the `office_world.world`
 - The robot spawned on open floor
 - `robot_state_publisher` (with `use_sim_time`)
 - `slam_toolbox` in mapping mode
