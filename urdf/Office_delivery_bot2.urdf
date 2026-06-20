@@ -180,17 +180,86 @@
   </link>
 
   <joint name="Lidar_Joint" type="fixed">
-    <origin xyz="0 0.01 0.8" rpy="0 0 0" />
+    <origin xyz="0 0.01 0.81" rpy="0 0 0" />
     <parent link="base_link" />
     <child link="Lidar_Link" />
     <axis xyz="0 0 1" />
   </joint>
+
+<!-- ======================== -->
+  <!--  CAMERA                  -->
+  <!--  Front-facing            -->
+  <!-- ======================== -->
+<link name="camera_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="0.05" />
+      <inertia ixx="0.00001" ixy="0" ixz="0" iyy="0.00001" iyz="0" izz="0.00001" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.08 0.03" />
+      </geometry>
+      <material name="camera_color">
+        <color rgba="0.05 0.05 0.05 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.08 0.03" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="camera_joint" type="fixed">
+    <origin xyz="0 -0.26 0.578" rpy="0 0 -1.5708" />
+    <parent link="base_link" />
+    <child link="camera_link" />
+  </joint>
+
+  <gazebo reference="camera_link">
+    <sensor type="camera" name="camera_sensor">
+      <update_rate>30.0</update_rate>
+      <camera name="head">
+        <horizontal_fov>1.3962634</horizontal_fov>
+        <image>
+          <width>640</width>
+          <height>480</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.02</near>
+          <far>50</far>
+        </clip>
+      </camera>
+      <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+        <ros>
+          <namespace>/</namespace>
+        </ros>
+        <camera_name>camera</camera_name>
+        <frame_name>camera_link</frame_name>
+      </plugin>
+    </sensor>
+  </gazebo>
+  
+  
+  <!-- ======================== -->
+  <!--  GAZEBO: WHEEL FRICTION  -->
+  <!--  Low mu2 for skid-steer  -->
+  <!-- ======================== -->
 
   <gazebo reference="Front_Left_Link"><mu1>1.0</mu1><mu2>0.3</mu2></gazebo>
   <gazebo reference="Front_right_Link"><mu1>1.0</mu1><mu2>0.3</mu2></gazebo>
   <gazebo reference="Rear_Left_Link"><mu1>1.0</mu1><mu2>0.3</mu2></gazebo>
   <gazebo reference="Rear_right_Link"><mu1>1.0</mu1><mu2>0.3</mu2></gazebo>
 
+
+<!-- ======================== -->
+  <!--  GAZEBO: LIDAR SENSOR    -->
+  <!--  360°, 720 samples, 10Hz -->
+  <!-- ======================== -->
   <gazebo reference="Lidar_Link">
     <sensor type="ray" name="lidar_sensor">
       <pose>0 0 0 0 0 0</pose>
@@ -199,14 +268,14 @@
       <ray>
         <scan>
           <horizontal>
-            <samples>360</samples>
+            <samples>720</samples>
             <resolution>1</resolution>
-            <min_angle>-3.14159</min_angle>
-            <max_angle>3.14159</max_angle>
+            <min_angle>-3.14</min_angle>
+            <max_angle>3.14</max_angle>
           </horizontal>
         </scan>
         <range>
-          <min>0.10</min>
+          <min>0.1</min>
           <max>10.0</max>
           <resolution>0.01</resolution>
         </range>
@@ -226,7 +295,31 @@
       </plugin>
     </sensor>
   </gazebo>
+  
+  <!-- ======================== -->
+  <!--  GAZEBO: IMU SENSOR      -->
+  <!--  100Hz for EKF fusion    -->
+  <!-- ======================== -->
+  <gazebo reference="base_link">
+  <sensor name="imu_sensor" type="imu">
+    <always_on>true</always_on>
+    <update_rate>100</update_rate>
+    <plugin name="imu_plugin" filename="libgazebo_ros_imu_sensor.so">
+      <ros>
+        <namespace>/</namespace>
+        <remapping>~/out:=imu</remapping>
+      </ros>
+      <frame_name>base_link</frame_name>
+      <initial_orientation_as_reference>false</initial_orientation_as_reference>
+    </plugin>
+  </sensor>
+</gazebo>
 
+
+ <!-- ================================ -->
+  <!--  GAZEBO: 4WD SKID-STEER DRIVE    -->
+  <!--  odom TF disabled (EKF handles)  -->
+  <!-- ================================ -->
   <gazebo>
     <plugin name="skid_steer_drive" filename="libgazebo_ros_diff_drive.so">
       <ros>
@@ -252,7 +345,7 @@
 
       <command_topic>cmd_vel</command_topic>
       <publish_odom>true</publish_odom>
-      <publish_odom_tf>true</publish_odom_tf>
+      <publish_odom_tf>false</publish_odom_tf>
       <publish_wheel_tf>true</publish_wheel_tf>
       <odometry_topic>odom</odometry_topic>
       <odometry_frame>odom</odometry_frame>

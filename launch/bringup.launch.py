@@ -9,7 +9,7 @@ from launch_ros.actions import Node
 def generate_launch_description():
     pkg = get_package_share_directory('Office_delivery_bot2')
     urdf_file = os.path.join(pkg, 'urdf', 'Office_delivery_bot2.urdf')
-    world_file = '/home/suyash/delivery_robot_ws/src/Office_delivery_bot2/world/cubicle_office.world'
+    world_file = '/home/suyash/delivery_robot_ws/src/Office_delivery_bot2/world/office_world.world'
     gazebo_ros_pkg = get_package_share_directory('gazebo_ros')
 
     with open(urdf_file, 'r') as f:
@@ -40,6 +40,17 @@ def generate_launch_description():
                 'use_sim_time': True
             }]
         ),
+        
+        
+        Node(
+             package='robot_localization',
+             executable='ekf_node',
+             name='ekf_filter_node',
+             output='screen',
+             parameters=[
+             os.path.join(pkg, 'config', 'ekf.yaml')
+          ]
+        ),
 
         # Spawn robot — COORDINATES GO HERE
         TimerAction(
@@ -51,7 +62,9 @@ def generate_launch_description():
                     arguments=[
                         '-file', urdf_file,
                         '-entity', 'robot',
-                        '-x', '-3.5', '-y', '3.6', '-z', '0.2'    # ← YOUR open floor spot
+                        '-x', '7.0', '-y', '1.0', '-z', '0.1',
+                        '-Y', '3.14159' 
+                    
                     ],
                     output='screen'
                 )

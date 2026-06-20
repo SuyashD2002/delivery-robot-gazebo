@@ -1,0 +1,298 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <world name="office_world">
+
+    <physics type="ode">
+      <real_time_update_rate>1000</real_time_update_rate>
+      <max_step_size>0.001</max_step_size>
+    </physics>
+
+    <include><uri>model://sun</uri></include>
+    <include><uri>model://ground_plane</uri></include>
+
+    <!-- ================================ -->
+    <!--  OUTER WALLS — 14m x 16m room    -->
+    <!--  0.2m thick, 2.5m tall           -->
+    <!-- ================================ -->
+
+    <model name="wall_south">
+      <static>true</static>
+      <pose>7 0 1.25 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>14.4 0.2 2.52</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>14.4 0.2 2.52</size></box></geometry>
+          <material><ambient>0.82 0.78 0.70 1</ambient><diffuse>0.82 0.78 0.70 1</diffuse></material></visual>
+      </link>
+    </model>
+
+    <model name="wall_north">
+      <static>true</static>
+      <pose>7 16 1.25 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>14.4 0.2 2.52</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>14.4 0.2 2.52</size></box></geometry>
+          <material><ambient>0.82 0.78 0.70 1</ambient><diffuse>0.82 0.78 0.70 1</diffuse></material></visual>
+      </link>
+    </model>
+
+    <model name="wall_west">
+      <static>true</static>
+      <pose>0 8 1.25 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>0.2 16.0 2.52</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.2 16.0 2.52</size></box></geometry>
+          <material><ambient>0.82 0.78 0.70 1</ambient><diffuse>0.82 0.78 0.70 1</diffuse></material></visual>
+      </link>
+    </model>
+
+    <model name="wall_east">
+      <static>true</static>
+      <pose>14 8 1.25 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>0.2 16.0 2.52</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.2 16.0 2.52</size></box></geometry>
+          <material><ambient>0.82 0.78 0.70 1</ambient><diffuse>0.82 0.78 0.70 1</diffuse></material></visual>
+      </link>
+    </model>
+
+    <!-- ================================ -->
+    <!--  MEETING ROOM WALLS (y=13 to 16) -->
+    <!--  Two rooms, doorway in center    -->
+    <!-- ================================ -->
+
+    <model name="meeting_wall_left">
+      <static>true</static>
+      <pose>2.5 13 1.25 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>5.0 0.2 2.52</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>5.0 0.2 2.52</size></box></geometry>
+          <material><ambient>0.78 0.75 0.68 1</ambient><diffuse>0.78 0.75 0.68 1</diffuse></material></visual>
+      </link>
+    </model>
+
+    <model name="meeting_wall_right">
+      <static>true</static>
+      <pose>11.5 13 1.25 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>5.0 0.2 2.52</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>5.0 0.2 2.52</size></box></geometry>
+          <material><ambient>0.78 0.75 0.68 1</ambient><diffuse>0.78 0.75 0.68 1</diffuse></material></visual>
+      </link>
+    </model>
+
+    <model name="meeting_divider">
+      <static>true</static>
+      <pose>7 14.5 1.25 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>0.2 3.0 2.52</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.2 3.0 2.52</size></box></geometry>
+          <material><ambient>0.78 0.75 0.68 1</ambient><diffuse>0.78 0.75 0.68 1</diffuse></material></visual>
+      </link>
+    </model>
+
+    <!-- Meeting tables (solid blocks) -->
+    <model name="meeting_table_left">
+      <static>true</static>
+      <pose>3.5 14.5 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>2.5 1.2 1.0</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>2.5 1.2 1.0</size></box></geometry>
+          <material><ambient>0.55 0.36 0.22 1</ambient><diffuse>0.65 0.42 0.25 1</diffuse></material></visual>
+      </link>
+    </model>
+
+    <model name="meeting_table_right">
+      <static>true</static>
+      <pose>10.5 14.5 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>2.5 1.2 1.0</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>2.5 1.2 1.0</size></box></geometry>
+          <material><ambient>0.55 0.36 0.22 1</ambient><diffuse>0.65 0.42 0.25 1</diffuse></material></visual>
+      </link>
+    </model>
+
+    <!-- ============================================ -->
+    <!--  CUBICLE CLUSTERS — 6 total (3 rows x 2 col) -->
+    <!--  Each: cross partition + 4 solid desk blocks  -->
+    <!--  Partition: 1.2m tall, 0.15m thick            -->
+    <!--  Desks: 0.8 x 0.5 x 0.75m solid blocks       -->
+    <!-- ============================================ -->
+
+    <!-- ===== CLUSTER 1: center (3.5, 2.5) ===== -->
+    <model name="c1_part_h">
+      <static>true</static>
+      <pose>3.5 2.5 0.6 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>2.4 0.15 1.22</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>2.4 0.15 1.22</size></box></geometry>
+          <material><ambient>0.65 0.63 0.60 1</ambient><diffuse>0.70 0.68 0.65 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="c1_part_v">
+      <static>true</static>
+      <pose>3.5 2.5 0.6 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>0.15 2.4 1.22</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.15 2.4 1.22</size></box></geometry>
+          <material><ambient>0.65 0.63 0.60 1</ambient><diffuse>0.70 0.68 0.65 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="c1_desk_ne">
+      <static>true</static>
+      <pose>4.2 3.2 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>0.8 0.5 1.0</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.8 0.5 1.0</size></box></geometry>
+          <material><ambient>0.55 0.36 0.22 1</ambient><diffuse>0.65 0.42 0.25 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="c1_desk_nw">
+      <static>true</static>
+      <pose>2.8 3.2 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>0.8 0.5 1.0</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.8 0.5 1.0</size></box></geometry>
+          <material><ambient>0.55 0.36 0.22 1</ambient><diffuse>0.65 0.42 0.25 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="c1_desk_se">
+      <static>true</static>
+      <pose>4.2 1.8 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>0.8 0.5 1.0</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.8 0.5 1.0</size></box></geometry>
+          <material><ambient>0.55 0.36 0.22 1</ambient><diffuse>0.65 0.42 0.25 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="c1_desk_sw">
+      <static>true</static>
+      <pose>2.8 1.8 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>0.8 0.5 1.0</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.8 0.5 1.0</size></box></geometry>
+          <material><ambient>0.55 0.36 0.22 1</ambient><diffuse>0.65 0.42 0.25 1</diffuse></material></visual>
+      </link>
+    </model>
+
+    <!-- ===== CLUSTER 2: center (10.5, 2.5) ===== -->
+    <model name="c2_part_h">
+      <static>true</static>
+      <pose>10.5 2.5 0.6 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>2.4 0.15 1.22</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>2.4 0.15 1.22</size></box></geometry>
+          <material><ambient>0.65 0.63 0.60 1</ambient><diffuse>0.70 0.68 0.65 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="c2_part_v">
+      <static>true</static>
+      <pose>10.5 2.5 0.6 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>0.15 2.4 1.22</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.15 2.4 1.22</size></box></geometry>
+          <material><ambient>0.65 0.63 0.60 1</ambient><diffuse>0.70 0.68 0.65 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="c2_desk_ne"><static>true</static><pose>11.2 3.2 0.5 0 0 0</pose><link name="link"><collision name="c"><geometry><box><size>0.8 0.5 1.0</size></box></geometry></collision><visual name="v"><geometry><box><size>0.8 0.5 1.0</size></box></geometry><material><ambient>0.55 0.36 0.22 1</ambient><diffuse>0.65 0.42 0.25 1</diffuse></material></visual></link></model>
+    <model name="c2_desk_nw"><static>true</static><pose>9.8 3.2 0.5 0 0 0</pose><link name="link"><collision name="c"><geometry><box><size>0.8 0.5 1.0</size></box></geometry></collision><visual name="v"><geometry><box><size>0.8 0.5 1.0</size></box></geometry><material><ambient>0.55 0.36 0.22 1</ambient><diffuse>0.65 0.42 0.25 1</diffuse></material></visual></link></model>
+    <model name="c2_desk_se"><static>true</static><pose>11.2 1.8 0.5 0 0 0</pose><link name="link"><collision name="c"><geometry><box><size>0.8 0.5 1.0</size></box></geometry></collision><visual name="v"><geometry><box><size>0.8 0.5 1.0</size></box></geometry><material><ambient>0.55 0.36 0.22 1</ambient><diffuse>0.65 0.42 0.25 1</diffuse></material></visual></link></model>
+    <model name="c2_desk_sw"><static>true</static><pose>9.8 1.8 0.5 0 0 0</pose><link name="link"><collision name="c"><geometry><box><size>0.8 0.5 1.0</size></box></geometry></collision><visual name="v"><geometry><box><size>0.8 0.5 1.0</size></box></geometry><material><ambient>0.55 0.36 0.22 1</ambient><diffuse>0.65 0.42 0.25 1</diffuse></material></visual></link></model>
+
+    <!-- ===== CLUSTER 3: center (3.5, 6.5) ===== -->
+    <model name="c3_part_h">
+      <static>true</static>
+      <pose>3.5 6.5 0.6 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>2.4 0.15 1.22</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>2.4 0.15 1.22</size></box></geometry>
+          <material><ambient>0.65 0.63 0.60 1</ambient><diffuse>0.70 0.68 0.65 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="c3_part_v">
+      <static>true</static>
+      <pose>3.5 6.5 0.6 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>0.15 2.4 1.22</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.15 2.4 1.22</size></box></geometry>
+          <material><ambient>0.65 0.63 0.60 1</ambient><diffuse>0.70 0.68 0.65 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="c3_desk_ne"><static>true</static><pose>4.2 7.2 0.5 0 0 0</pose><link name="link"><collision name="c"><geometry><box><size>0.8 0.5 1.0</size></box></geometry></collision><visual name="v"><geometry><box><size>0.8 0.5 1.0</size></box></geometry><material><ambient>0.55 0.36 0.22 1</ambient><diffuse>0.65 0.42 0.25 1</diffuse></material></visual></link></model>
+    <model name="c3_desk_nw"><static>true</static><pose>2.8 7.2 0.5 0 0 0</pose><link name="link"><collision name="c"><geometry><box><size>0.8 0.5 1.0</size></box></geometry></collision><visual name="v"><geometry><box><size>0.8 0.5 1.0</size></box></geometry><material><ambient>0.55 0.36 0.22 1</ambient><diffuse>0.65 0.42 0.25 1</diffuse></material></visual></link></model>
+    <model name="c3_desk_se"><static>true</static><pose>4.2 5.8 0.5 0 0 0</pose><link name="link"><collision name="c"><geometry><box><size>0.8 0.5 1.0</size></box></geometry></collision><visual name="v"><geometry><box><size>0.8 0.5 1.0</size></box></geometry><material><ambient>0.55 0.36 0.22 1</ambient><diffuse>0.65 0.42 0.25 1</diffuse></material></visual></link></model>
+    <model name="c3_desk_sw"><static>true</static><pose>2.8 5.8 0.5 0 0 0</pose><link name="link"><collision name="c"><geometry><box><size>0.8 0.5 1.0</size></box></geometry></collision><visual name="v"><geometry><box><size>0.8 0.5 1.0</size></box></geometry><material><ambient>0.55 0.36 0.22 1</ambient><diffuse>0.65 0.42 0.25 1</diffuse></material></visual></link></model>
+
+    <!-- ===== CLUSTER 4: center (10.5, 6.5) ===== -->
+    <model name="c4_part_h">
+      <static>true</static>
+      <pose>10.5 6.5 0.6 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>2.4 0.15 1.22</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>2.4 0.15 1.22</size></box></geometry>
+          <material><ambient>0.65 0.63 0.60 1</ambient><diffuse>0.70 0.68 0.65 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="c4_part_v">
+      <static>true</static>
+      <pose>10.5 6.5 0.6 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>0.15 2.4 1.22</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.15 2.4 1.22</size></box></geometry>
+          <material><ambient>0.65 0.63 0.60 1</ambient><diffuse>0.70 0.68 0.65 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="c4_desk_ne"><static>true</static><pose>11.2 7.2 0.5 0 0 0</pose><link name="link"><collision name="c"><geometry><box><size>0.8 0.5 1.0</size></box></geometry></collision><visual name="v"><geometry><box><size>0.8 0.5 1.0</size></box></geometry><material><ambient>0.55 0.36 0.22 1</ambient><diffuse>0.65 0.42 0.25 1</diffuse></material></visual></link></model>
+    <model name="c4_desk_nw"><static>true</static><pose>9.8 7.2 0.5 0 0 0</pose><link name="link"><collision name="c"><geometry><box><size>0.8 0.5 1.0</size></box></geometry></collision><visual name="v"><geometry><box><size>0.8 0.5 1.0</size></box></geometry><material><ambient>0.55 0.36 0.22 1</ambient><diffuse>0.65 0.42 0.25 1</diffuse></material></visual></link></model>
+    <model name="c4_desk_se"><static>true</static><pose>11.2 5.8 0.5 0 0 0</pose><link name="link"><collision name="c"><geometry><box><size>0.8 0.5 1.0</size></box></geometry></collision><visual name="v"><geometry><box><size>0.8 0.5 1.0</size></box></geometry><material><ambient>0.55 0.36 0.22 1</ambient><diffuse>0.65 0.42 0.25 1</diffuse></material></visual></link></model>
+    <model name="c4_desk_sw"><static>true</static><pose>9.8 5.8 0.5 0 0 0</pose><link name="link"><collision name="c"><geometry><box><size>0.8 0.5 1.0</size></box></geometry></collision><visual name="v"><geometry><box><size>0.8 0.5 1.0</size></box></geometry><material><ambient>0.55 0.36 0.22 1</ambient><diffuse>0.65 0.42 0.25 1</diffuse></material></visual></link></model>
+
+    <!-- ===== CLUSTER 5: center (3.5, 10.5) ===== -->
+    <model name="c5_part_h">
+      <static>true</static>
+      <pose>3.5 10.5 0.6 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>2.4 0.15 1.22</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>2.4 0.15 1.22</size></box></geometry>
+          <material><ambient>0.65 0.63 0.60 1</ambient><diffuse>0.70 0.68 0.65 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="c5_part_v">
+      <static>true</static>
+      <pose>3.5 10.5 0.6 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>0.15 2.4 1.22</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.15 2.4 1.22</size></box></geometry>
+          <material><ambient>0.65 0.63 0.60 1</ambient><diffuse>0.70 0.68 0.65 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="c5_desk_ne"><static>true</static><pose>4.2 11.2 0.5 0 0 0</pose><link name="link"><collision name="c"><geometry><box><size>0.8 0.5 1.0</size></box></geometry></collision><visual name="v"><geometry><box><size>0.8 0.5 1.0</size></box></geometry><material><ambient>0.55 0.36 0.22 1</ambient><diffuse>0.65 0.42 0.25 1</diffuse></material></visual></link></model>
+    <model name="c5_desk_nw"><static>true</static><pose>2.8 11.2 0.5 0 0 0</pose><link name="link"><collision name="c"><geometry><box><size>0.8 0.5 1.0</size></box></geometry></collision><visual name="v"><geometry><box><size>0.8 0.5 1.0</size></box></geometry><material><ambient>0.55 0.36 0.22 1</ambient><diffuse>0.65 0.42 0.25 1</diffuse></material></visual></link></model>
+    <model name="c5_desk_se"><static>true</static><pose>4.2 9.8 0.5 0 0 0</pose><link name="link"><collision name="c"><geometry><box><size>0.8 0.5 1.0</size></box></geometry></collision><visual name="v"><geometry><box><size>0.8 0.5 1.0</size></box></geometry><material><ambient>0.55 0.36 0.22 1</ambient><diffuse>0.65 0.42 0.25 1</diffuse></material></visual></link></model>
+    <model name="c5_desk_sw"><static>true</static><pose>2.8 9.8 0.5 0 0 0</pose><link name="link"><collision name="c"><geometry><box><size>0.8 0.5 1.0</size></box></geometry></collision><visual name="v"><geometry><box><size>0.8 0.5 1.0</size></box></geometry><material><ambient>0.55 0.36 0.22 1</ambient><diffuse>0.65 0.42 0.25 1</diffuse></material></visual></link></model>
+
+    <!-- ===== CLUSTER 6: center (10.5, 10.5) ===== -->
+    <model name="c6_part_h">
+      <static>true</static>
+      <pose>10.5 10.5 0.6 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>2.4 0.15 1.22</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>2.4 0.15 1.22</size></box></geometry>
+          <material><ambient>0.65 0.63 0.60 1</ambient><diffuse>0.70 0.68 0.65 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="c6_part_v">
+      <static>true</static>
+      <pose>10.5 10.5 0.6 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>0.15 2.4 1.22</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.15 2.4 1.22</size></box></geometry>
+          <material><ambient>0.65 0.63 0.60 1</ambient><diffuse>0.70 0.68 0.65 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="c6_desk_ne"><static>true</static><pose>11.2 11.2 0.5 0 0 0</pose><link name="link"><collision name="c"><geometry><box><size>0.8 0.5 1.0</size></box></geometry></collision><visual name="v"><geometry><box><size>0.8 0.5 1.0</size></box></geometry><material><ambient>0.55 0.36 0.22 1</ambient><diffuse>0.65 0.42 0.25 1</diffuse></material></visual></link></model>
+    <model name="c6_desk_nw"><static>true</static><pose>9.8 11.2 0.5 0 0 0</pose><link name="link"><collision name="c"><geometry><box><size>0.8 0.5 1.0</size></box></geometry></collision><visual name="v"><geometry><box><size>0.8 0.5 1.0</size></box></geometry><material><ambient>0.55 0.36 0.22 1</ambient><diffuse>0.65 0.42 0.25 1</diffuse></material></visual></link></model>
+    <model name="c6_desk_se"><static>true</static><pose>11.2 9.8 0.5 0 0 0</pose><link name="link"><collision name="c"><geometry><box><size>0.8 0.5 1.0</size></box></geometry></collision><visual name="v"><geometry><box><size>0.8 0.5 1.0</size></box></geometry><material><ambient>0.55 0.36 0.22 1</ambient><diffuse>0.65 0.42 0.25 1</diffuse></material></visual></link></model>
+    <model name="c6_desk_sw"><static>true</static><pose>9.8 9.8 0.5 0 0 0</pose><link name="link"><collision name="c"><geometry><box><size>0.8 0.5 1.0</size></box></geometry></collision><visual name="v"><geometry><box><size>0.8 0.5 1.0</size></box></geometry><material><ambient>0.55 0.36 0.22 1</ambient><diffuse>0.65 0.42 0.25 1</diffuse></material></visual></link></model>
+
+  </world>
+</sdf>
