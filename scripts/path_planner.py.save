@@ -1,0 +1,213 @@
+#!/usr/bin/env python
+import rclpy
+from rclpy.node import Node
+from sensor_msgs.msg import LaserScan
+from nav_msgs.msg import Odometry, OccupancyGrid
+from geometry_msgs.msg import Twist, PoseStamped
+from nav_msgs.msg import Path
+import math, numpy as np, sys, time, threading, heapq, cv2, yaml, os
+
+class Planner(Node):
+    def __init__(self):
+        super().__init__('pp')
+        self.pub = self.create_publisher(Twist, '/cmd_vel', 10)
+        self.cost_pub = self.create_publisher(OccupancyGrid, '/costmap', 10)
+        self.path_pub = self.create_publisher(Path, '/planned_path', 10)
+        self.create_subscription(Odometry, '/odometry/filtered', self.oc, 10)
+        self.create_subscription(LaserScan, '/scan', self.sc, 10)
+        self.create_subscription(PoseStamped, '/goal_pose', self.goal_cb, 10)
+        self.x = self.y = self.yaw = 0.0
+        self.r = np.full(720, 10.0)
+        self.ok = False
+        self.navigating = False
+        h = os.path.expanduser('~')
+        yf = h + '/delivery_robot_ws/src/Office_delivery_bot2/map/office_map.yaml'
+        with open(yf) as ff:
+            info = yaml.safe_load(ff)
+        self.img = cv2.imread(os.path.join(os.path.dirname(yf), info['image']), 0)
+        self.res = info['resolution']
+        self.ox, self.oy = info['origin'][0], info['origin'][1]
+        self.mh, self.mw = self.img.shape
+        k = int(0.4 / self.res)
+        self.inf = cv2.dilate((self.img < 200).astype(np.uint8) * 255, np.ones((k, k), np.uint8))
+        self.get_logger().info('A* Path Planner ready! Use 2D Goal Pose in RViz')
+        self.cost_timer = self.create_timer(2.0, self.publish_costmap)
+
+    def publish_costmap(self):
+        msg = OccupancyGrid()
+        msg.header.stamp = self.get_clock().now().to_msg()
+        msg.header.frame_id = 'map'
+        msg.info.resolution = self.res
+        msg.info.width = self.mw
+        msg.info.height = self.mh
+        msg.info.origin.position.x = self.ox
+        msg.info.origin.position.y = self.oy
+        data = np.zeros(self.mh * self.mw, dtype=np.int8)
+        for y in range(self.mh):
+            for x in range(self.mw):
+                idx = (self.mh - 1 - y) * self.mw + x
+                if idx < len(data):
+                    if self.inf[y, x] > 0:
+                        data[idx] = 100
+                    elif self.img[y, x] < 200:
+                        data[idx] = 100
+                    elif self.img[y, x] < 230:
+                        data[idx] = 50
+                    else:
+                        data[idx] = 0
+        msg.data = data.tolist()
+        self.cost_pub.publish(msg)
+
+    def goal_cb(self, msg):
+        if self.navigating:
+            self.get_logger().info('Already navigating! Wait...')
+            return
+        gx = msg.pose.position.x
+        gy = msg.pose.position.y
+        self.get_logger().info(f'New goal from RViz: ({gx:.1f}, {gy:.1f})')
+        threading.Thread(target=self.go, args=(gx, gy), daemon=True).start()
+
+    def oc(self, m):
+        self.x = m.pose.pose.position.x
+        self.y = m.pose.pose.position.y
+        q = m.pose.pose.orientation
+        self.yaw = math.atan2(2 * (q.w * q.z + q.x * q.y), 1 - 2 * (q.y * q.y + q.z * q.z))
+        self.ok = True
+
+    def sc(self, m):
+        r = np.array(m.ranges)
+        self.r = np.where(np.isfinite(r), r, 10.0)
+
+    def front(self):
+        return float(np.min(self.r[120:240]))
+
+    def w2m(self, x, y):
+        return int((x - self.ox) / self.res), self.mh - 1 - int((y - self.oy) / self.res)
+def front(self):
+    return float(np.min(np.concatenate([self.r[0:60], self.r[660:720]]))
+    def m2w(self, x, y):
+        return x * self.res + self.ox, (self.mh - 1 - y) * self.res + self.oy
+
+    def ff(self, mx, my):
+        for rr in range(1, 30):
+            for dx in range(-rr, rr + 1):
+                for dy in range(-rr, rr + 1):
+                    nx, ny = mx + dx, my + dy
+                    if 0 <= nx < self.mw and 0 <= ny < self.mh and self.inf[ny, nx] == 0:
+                        return nx, ny
+        return mx, my
+
+    def astar(self, gx, gy):
+        sx, sy = self.w2m(self.x, self.y)
+        gmx, gmy = self.w2m(gx, gy)
+        if self.inf[sy, sx] > 0:
+            sx, sy = self.ff(sx, sy)
+        if self.inf[gmy, gmx] > 0:
+            gmx, gmy = self.ff(gmx, gmy)
+        hp = [(0, sx, sy)]
+        ca = {}
+        gs = {(sx, sy): 0}
+        cl = set()
+        while hp:
+            _, cx, cy = heapq.heappop(hp)
+            if (cx, cy) in cl:
+                continue
+            cl.add((cx, cy))
+            if abs(cx - gmx) <= 2 and abs(cy - gmy) <= 2:
+                p = []
+                n = (cx, cy)
+                while n in ca:
+                    p.append(self.m2w(n[0], n[1]))
+                    n = ca[n]
+                p.reverse()
+                s = p[::15]
+                if p and s[-1] != p[-1]:
+                    s.append(p[-1])
+                return s
+            for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (1, -1), (-1, 1), (1, 1)]:
+                nx, ny = cx + dx, cy + dy
+                if 0 <= nx < self.mw and 0 <= ny < self.mh and (nx, ny) not in cl and self.inf[ny, nx] == 0:
+                    c = 1.0 if dx == 0 or dy == 0 else 1.414
+                    ng = gs[(cx, cy)] + c
+                    if ng < gs.get((nx, ny), 1e9):
+                        gs[(nx, ny)] = ng
+                        heapq.heappush(hp, (ng + math.hypot(nx - gmx, ny - gmy), nx, ny))
+                        ca[(nx, ny)] = (cx, cy)
+        return None
+
+    def publish_path(self, waypoints):
+        msg = Path()
+        msg.header.stamp = self.get_clock().now().to_msg()
+        msg.header.frame_id = 'map'
+        for wx, wy in waypoints:
+            ps = PoseStamped()
+            ps.header = msg.header
+            ps.pose.position.x = float(wx)
+            ps.pose.position.y = float(wy)
+            ps.pose.orientation.w = 1.0
+            msg.poses.append(ps)
+        self.path_pub.publish(msg)
+
+    def cmd(self, lx, az):
+        c = Twist()
+        c.linear.x = float(lx)
+        c.angular.z = float(az)
+        self.pub.publish(c)
+
+    def go(self, gx, gy):
+        self.navigating = True
+        while not self.ok:
+            time.sleep(0.1)
+        self.get_logger().info(f'Planning from ({self.x:.1f},{self.y:.1f}) to ({gx:.1f},{gy:.1f})')
+        path = self.astar(gx, gy)
+        if not path:
+            self.get_logger().error('No path found!')
+            self.navigating = False
+            return
+        self.get_logger().info(f'A* path: {len(path)} waypoints')
+        self.publish_path(path)
+        for i, (wx, wy) in enumerate(path):
+            self.get_logger().info(f'  WP{i+1}: ({wx:.1f},{wy:.1f})')
+        for i, (wx, wy) in enumerate(path):
+            self.get_logger().info(f'-> WP{i+1}/{len(path)}')
+            for _ in range(500):
+                d = math.hypot(wx - self.x, wy - self.y)
+                if d < 0.8:
+                    break
+                ga = math.atan2(wy - self.y, wx - self.x)
+                hd = self.yaw - math.pi / 2
+                e = ga - hd
+                while e > math.pi:
+                    e -= 2 * math.pi
+                while e < -math.pi:
+                    e += 2 * math.pi
+                if d < 1.5 and abs(e) > 2.0:
+                    break
+                ft = self.front()
+                if ft < 1.2:
+                    self.cmd(-0.15, 0)
+                    time.sleep(0.5)
+                    self.cmd(0.1, 0.6)
+                    time.sleep(1.5)
+                    continue
+                az = max(min(-e * 0.5, 0.5), -0.5)
+                sp = 0.2 if abs(e) < 0.5 else 0.1
+                self.cmd(sp, az)
+                time.sleep(0.1)
+            self.cmd(0, 0)
+            time.sleep(0.2)
+            self.get_logger().info(f'WP{i+1} done ({self.x:.1f},{self.y:.1f})')
+        self.cmd(0, 0)
+        self.get_logger().info(f'=== DELIVERED! Stopped at ({self.x:.1f},{self.y:.1f}) ===')
+        self.navigating = False
+
+def main():
+    rclpy.init()
+    node = Planner()
+    if len(sys.argv) >= 3:
+        threading.Thread(target=node.go, args=(float(sys.argv[1]), float(sys.argv[2])), daemon=True).start()
+    rclpy.spin(node)
+    rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
