@@ -244,8 +244,8 @@ Office_delivery_bot2/
 - [x] IMU sensor + EKF odometry fusion (robot_localization)
 - [x] Camera sensor integration
 - [x] Map saved (office_map.pgm + office_map.yaml)
-- [ ] Nav2 integration for autonomous navigation
-- [ ] Goal-based path planning and delivery
+- [x] Nav2 integration for autonomous navigation
+- [x] Goal-based path planning and delivery
 
 ---
 
